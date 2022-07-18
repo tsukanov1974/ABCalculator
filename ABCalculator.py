@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import messagebox as mb
 import os
 import math
+from scipy.stats import norm
 
 # Функция закрытия программы
 def do_close():
@@ -11,7 +12,7 @@ def do_close():
 
 # Функция форматирования процентов
 def  num_percent(num):
-      return "{:.2f''}".format(num*100).rjust(10) + "%"
+      return "{: .2f'}".format(num*100).rjust(10) + "%"
 
 def do_processing():
       # Считывание данных из полей ввода
@@ -96,7 +97,43 @@ def popup_window(n1, c1, n2, c2):
       txtOutput.insert(tk.END, 'Конверсия                         От        '   + num_percent(upper1_99)
               + '        ' + num_percent(upper2_99) + os.linesep)
       txtOutput.insert(tk.END, '----------------------------------------------------------- ' + os.linesep)
+      
+      # Вычисление Z и P
+      z_score = (p2-p1)/math.sqrt(sigma1*sigma1+sigma2*sigma2)
+      txtOutput.insert(tk.END,  'Z = ' + "{: .7f}", format(s_score) + os.linesep)
+      
+      p_value = norm.sf(x=z_score, loc=0, scale=1)
+      txtOutput.insert(tk.END,  'P = ' + "{: .7f}", format(p_value) + os.linesep)
+      
+      # Добавление оценки результатов
+      confidence_95 = False
+      if p_value < 0.025 or p_value > 0.975:
+           confidence_95 = True
                
+      confidence_99 = False
+      if p_value < 0.005 or p_value > 0.995:
+           confidence_99 = True
+           
+      lblComment95 = tk.Label(window, text = '95% уверенность:', font = ('Helvetica', 10, 'bold'))
+      lblComment95.place(x=25, y=25)
+     
+      if confidence_95:
+          lblResult95 = tk.Label(window, text = 'ДА', font = ('Helvetica', 12, 'bold'), fg = '#008800')
+          lblResult95.place(x=160, y=25)
+      else:
+          lblResult95 = tk.Label(window, text = 'НЕТ', font = ('Helvetica', 12, 'bold'), fg = '#ff0000')
+          lblResult95.place(x=160, y=25)
+         
+      lblComment99 = tk.Label(window, text = '99% уверенность:', font = ('Helvetica', 10, 'bold'))
+      lblComment99.place(x=25, y=65)
+     
+      if confidence_99:
+          lblResult99 = tk.Label(window, text = 'ДА', font = ('Helvetica', 12, 'bold'), fg = '#008800')
+          lblResult99.place(x=160, y=65)
+      else:
+          lblResult99 = tk.Label(window, text = 'НЕТ', font = ('Helvetica', 12, 'bold'), fg = '#ff0000')
+          lblResult99.place(x=160, y=65)
+                  
      # Добавление кнопки закрытия программы
       btnClosePopup = tk.Button(window, text = "Закрыть", font = ('Helvetica', 10, 'bold'), command = window.destroy)
       btnClosePopup.place(x = 160, y = 450, width = 90, height = 30)
